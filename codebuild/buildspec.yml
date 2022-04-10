@@ -12,11 +12,13 @@ phases:
       - echo Building the Docker image...
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
       - docker push $ECR_REPO/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - printf '[{"name":"wp-site-container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - docker push $ECR_REPO/$IMAGE_REPO_NAME:$CODEBUILD_BUILD_NUMBER
+      - printf '[{"name":"wp-site-container","imageUri":"%s"}]' $REPOSITORY_URI:$CODEBUILD_BUILD_NUMBER > imagedefinitions.json
 artifacts:
     files: imagedefinitions.json
